@@ -1,0 +1,24 @@
+<extension type="component" method="upgrade">
+    <name>com_vapi</name>
+    <author>calitorweb</author>
+	<creationDate>2022-11</creationDate>
+	<copyright>Copyright (c)2022 carlitorweb</copyright>
+	<license>GNU GPL v3 or later</license>
+	<authorEmail>crsanchez8646@gmail.com</authorEmail>
+	<version>1.0.0</version>
+    <description>API code for VAPI</description>
+
+    <namespace path="src/">Carlitorweb\Component\Vapi</namespace>
+
+    <administration>
+        <files folder="backend/">
+
+        </files>
+    </administration>
+
+    <api>
+        <files folder="api">
+            <folder>src</folder>
+        </files>
+    </api>
+</extension>
