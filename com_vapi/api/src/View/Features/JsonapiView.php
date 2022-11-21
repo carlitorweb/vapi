@@ -2,9 +2,9 @@
 
 namespace Carlitorweb\Component\Vapi\Api\View\Features;
 
-use Joomla\CMS\MVC\View\JsonApiView as BaseApiView;
+defined('_JEXEC') || die;
 
-\defined('_JEXEC') or die;
+use Joomla\CMS\MVC\View\JsonApiView as BaseApiView;
 
 class JsonapiView extends BaseApiView
 {

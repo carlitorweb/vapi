@@ -2,9 +2,10 @@
 
 namespace Carlitorweb\Component\Vapi\Api\Controller;
 
+defined('_JEXEC') || die;
+
 use Joomla\CMS\MVC\Controller\ApiController;
 
-\defined('_JEXEC') or die;
 
 class FeaturesController extends ApiController
 {
@@ -18,4 +19,15 @@ class FeaturesController extends ApiController
      * @var $default_view Will be used as default for $viewName
      */
     protected $default_view = 'features';
+
+    /**
+     * Article list view amended to add filtering of data
+     *
+     * @return  static  A BaseController object to support chaining.
+     *
+     */
+    public function displayList()
+    {
+        return parent::displayList();
+    }
 }

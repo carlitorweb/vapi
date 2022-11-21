@@ -11,13 +11,16 @@
     <namespace path="src/">Carlitorweb\Component\Vapi</namespace>
 
     <administration>
+        <menu link="index.php?option=com_vapi">Vapi</menu>
         <files folder="backend/">
-
+            <folder>services</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
         </files>
     </administration>
 
     <api>
-        <files folder="api">
+        <files folder="api/">
             <folder>src</folder>
         </files>
     </api>
