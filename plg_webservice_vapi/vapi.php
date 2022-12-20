@@ -10,7 +10,7 @@ use Joomla\Router\Route;
 class PlgWebservicesVapi extends CMSPlugin
 {
     /**
-     * Registers com_vapi's API's routes in the application
+     * Registers com_vapi API's routes in the application
      *
      * @param   ApiRouter  &$router  The API Routing object
      *
@@ -19,7 +19,9 @@ class PlgWebservicesVapi extends CMSPlugin
      */
     public function onBeforeApiRoute(&$router)
     {
-        $this->createFeaturedRoutes($router, 'v1/vapi/features', 'features');
+        // Render a list of com_content articles using the specific module
+        // params as filters for the articles model
+        $this->createModuleSiteRoutes($router, 'v1/vapi/modules/:id', 'modules.displayList');
     }
 
     /**
@@ -34,15 +36,16 @@ class PlgWebservicesVapi extends CMSPlugin
      * @return  void
      *
      */
-    private function createFeaturedRoutes(&$router, $baseName, $controller, $defaults = [], $publicGets = false): void
+    private function createModuleSiteRoutes(&$router, $baseName, $controller, $defaults = [], $publicGets = true): void
     {
         $defaults    = [
             'component'  => 'com_vapi',
-            'public' => $publicGets
+            'public' => $publicGets,
+            'client_id' => 0
         ];
 
         $routes = [
-            new Route(['GET'], $baseName, $controller . '.displayList', [], $defaults),
+            new Route(['GET'], $baseName, $controller, ['id' => '(\d+)'], $defaults),
         ];
 
         $router->addRoutes($routes);
