@@ -1,0 +1,19 @@
+<updates>
+	<update>
+		<name>Vapi</name>
+		<description>Vapi Package</description>
+		<element>pkg_vapi</element>
+		<type>package</type>
+		<version>1.0.0</version>
+		<downloads>
+			<downloadurl type="full" format="zip"></downloadurl>
+		</downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>carlitorweb</maintainer>
+		<maintainerurl>https://github.com/carlitorweb/vapi</maintainerurl>
+		<targetplatform name="joomla" version="(4\.(0|1)))" />
+		<php_minimum>7.2</php_minimum>
+    </update>
+</updates>
