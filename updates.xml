@@ -4,10 +4,10 @@
 		<description>Vapi Package</description>
 		<element>pkg_vapi</element>
 		<type>package</type>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 		<downloads>
-			<downloadurl type="full" format="zip"></downloadurl>
-		</downloads>
+			<downloadurl type="full" format="zip">https://github.com/carlitorweb/vapi/releases/download/v1.0.1/vapi.zip</downloadurl>
+        </downloads>
 		<tags>
 			<tag>stable</tag>
 		</tags>
