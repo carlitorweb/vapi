@@ -1,0 +1,10 @@
+<changelogs>
+    <changelog>
+        <element>pkg_vapi</element>
+        <type>package</type>
+        <version>1.0.2</version>
+        <note>
+            <item><![CDATA[<h2>Sync the first stable version</h2>]]></item>
+        </note>
+    </changelog>
+</changelogs>

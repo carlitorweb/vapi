@@ -10,7 +10,7 @@
     <author>carlitorweb</author>
     <creationDate>2022-12-21</creationDate>
     <packagename>vapi</packagename>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <url>https://github.com/carlitorweb/vapi</url>
     <packager>carlitorweb</packager>
     <packagerurl>https://github.com/carlitorweb/vapi</packagerurl>
@@ -22,13 +22,15 @@
     <blockChildUninstall>true</blockChildUninstall>
 
     <!-- List of extensions to install -->
-    <files>
+    <files folder="packages">
         <!-- Component -->
         <file type="component" id="com_vapi">com_vapi.zip</file>
 
-        <!-- Plugins: system -->
-        <file type="plugin" group="webservices" id="vapi">plg_webservices_vapi.zip</file>
+        <!-- Plugins: webservices -->
+        <file type="plugin" id="vapi" group="webservices">plg_webservices_vapi.zip</file>
     </files>
+
+    <changelogurl>https://raw.githubusercontent.com/carlitorweb/vapi/master/changelog.xml</changelogurl>
 
     <!-- Update servers -->
     <updateservers>
