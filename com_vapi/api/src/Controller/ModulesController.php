@@ -6,11 +6,13 @@ defined('_JEXEC') || die;
 
 use Joomla\CMS\MVC\Controller\ApiController;
 use Joomla\CMS\Component\ComponentHelper;
-use Carlitorweb\Component\Vapi\Api\Helper\VapiHelper;
 use Joomla\Registry\Registry;
 use Joomla\Component\Content\Administrator\Extension\ContentComponent;
 use Joomla\Component\Content\Site\Model\ArticlesModel;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Factory;
+use Joomla\Database\ParameterType;
+use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 
 /**
  * * NOTE: Also we can connect to my own model
@@ -141,7 +143,58 @@ class ModulesController extends ApiController
         }
 
         // Get the module params
-        $module = VapiHelper::getModuleById($id);
+        $module = $this->getModuleById($id);
         return $this->moduleParams = new Registry($module->params);
+    }
+
+    /**
+     * Get module by id
+     *
+     * @param   int  $id  The id of the module
+     *
+     * @return  \stdClass  The Module object
+     *
+     * @throws \RuntimeException If the module could not be found
+     *
+     * @see \Joomla\CMS\Helper\ModuleHelper
+     */
+    protected function getModuleById(int $moduleId): object
+    {
+        /** @var \Joomla\CMS\Application\CMSApplicationInterface $app */
+        $app    = Factory::getApplication();
+
+        // Build a cache ID for the resulting data object
+        $cacheId = 'moduleId' . $moduleId;
+
+        /** @var \Joomla\Database\DatabaseDriver $db */
+        $db = Factory::getContainer()->get('DatabaseDriver');
+        $query  = $db->getQuery(true);
+
+        $query->select('m.*')
+            ->from($db->quoteName('#__modules', 'm'))
+            ->where(
+                $db->quoteName('m.id') . ' = :moduleId'
+            )
+            ->bind(':moduleId', $moduleId, ParameterType::INTEGER);
+
+        // Set the query
+        $db->setQuery($query);
+
+        try {
+            /** @var \Joomla\CMS\Cache\Controller\CallbackController $cache */
+            $cache = Factory::getContainer()->get(CacheControllerFactoryInterface::class)
+                ->createCacheController('callback', ['defaultgroup' => 'com_modules']);
+
+            $module = $cache->get(array($db, 'loadObject'), array(), md5($cacheId), false);
+        } catch (\RuntimeException $e) {
+            $app->getLogger()->warning(
+                Text::sprintf('JLIB_APPLICATION_ERROR_MODULE_LOAD', $e->getMessage()),
+                array('category' => 'jerror')
+            );
+
+            return array();
+        }
+
+        return $module;
     }
 }

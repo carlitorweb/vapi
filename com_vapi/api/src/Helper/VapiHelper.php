@@ -4,66 +4,11 @@ namespace Carlitorweb\Component\Vapi\Api\Helper;
 
 defined('_JEXEC') || die;
 
-use Joomla\CMS\Factory;
-use Joomla\Database\ParameterType;
-use Joomla\CMS\Language\Text;
-use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
 
 class VapiHelper
 {
-    /**
-     * Get module by id
-     *
-     * @param   int  $id  The id of the module
-     *
-     * @return  \stdClass  The Module object
-     *
-     * @throws \RuntimeException If the module could not be found
-     *
-     * @see \Joomla\CMS\Helper\ModuleHelper
-     */
-    public static function getModuleById(int $moduleId): object
-    {
-        /** @var \Joomla\CMS\Application\CMSApplicationInterface $app */
-        $app    = Factory::getApplication();
-
-        // Build a cache ID for the resulting data object
-        $cacheId = 'moduleId' . $moduleId;
-
-        /** @var \Joomla\Database\DatabaseDriver $db */
-        $db = Factory::getContainer()->get('DatabaseDriver');
-        $query  = $db->getQuery(true);
-
-        $query->select('m.*')
-            ->from($db->quoteName('#__modules', 'm'))
-            ->where(
-                $db->quoteName('m.id') . ' = :moduleId'
-            )
-            ->bind(':moduleId', $moduleId, ParameterType::INTEGER);
-
-        // Set the query
-        $db->setQuery($query);
-
-        try {
-            /** @var \Joomla\CMS\Cache\Controller\CallbackController $cache */
-            $cache = Factory::getContainer()->get(CacheControllerFactoryInterface::class)
-                ->createCacheController('callback', ['defaultgroup' => 'com_modules']);
-
-            $module = $cache->get(array($db, 'loadObject'), array(), md5($cacheId), false);
-        } catch (\RuntimeException $e) {
-            $app->getLogger()->warning(
-                Text::sprintf('JLIB_APPLICATION_ERROR_MODULE_LOAD', $e->getMessage()),
-                array('category' => 'jerror')
-            );
-
-            return array();
-        }
-
-        return $module;
-    }
-
     /**
      * Method to escape output.
      *
