@@ -9,6 +9,7 @@ use Joomla\Database\ParameterType;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Uri\Uri;
 
 class VapiHelper
 {
@@ -94,7 +95,7 @@ class VapiHelper
         if (!empty($_images->image_intro)) {
             $img = HTMLHelper::_('cleanImageURL', $_images->image_intro);
 
-            $_introImage->src = self::escape($img->url);
+            $_introImage->src =  self::resolve($img->url);
             $_introImage->alt = empty($_images->image_intro_alt) && empty($_images->image_intro_alt_empty) ? false : self::escape($_images->image_intro_alt);
 
 
@@ -107,7 +108,7 @@ class VapiHelper
         if (!empty($_images->image_fulltext)) {
             $img = HTMLHelper::_('cleanImageURL', $_images->image_fulltext);
 
-            $_fullImage->src = self::escape($img->url);
+            $_fullImage->src = self::resolve($img->url);
             $_fullImage->alt = empty($_images->image_fulltext_alt) && empty($_images->image_fulltext_alt_empty) ? false : self::escape($_images->image_intro_alt);
             $_fullImage->caption = empty($_images->image_fulltext_caption) ? false : self::escape($_images->image_fulltext_caption);
 
@@ -118,5 +119,22 @@ class VapiHelper
         }
 
         return ['intro' => $_introImage, 'full' => $_fullImage];
+    }
+
+    /**
+     * Fully Qualified Domain name for the image url
+     *
+     * @param   string  $uri      The uri to resolve
+     *
+     * @return  string
+     */
+    protected static function resolve(string $uri): string
+    {
+        // Check if external URL.
+        if (stripos($uri, 'http') !== 0) {
+            return Uri::root() . $uri;
+        }
+
+        return $uri;
     }
 }
