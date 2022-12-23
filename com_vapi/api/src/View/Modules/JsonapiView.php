@@ -19,14 +19,18 @@ class JsonapiView extends BaseApiView
         'displayAuthorName',
         'author_email',
         'alias',
-        'displayCategoryTitle',
-        'category_alias',
         'displayDate',
         'images',
         'metadesc',
         'metakey',
         'params',
         'displayHits',
+        'displayCategoryTitle',
+        'category_alias',
+        'categoryDescription',
+        'categoryMetadesc',
+        'categoryMetakey',
+        'categoryImage',
     ];
 
     /**
@@ -88,6 +92,19 @@ class JsonapiView extends BaseApiView
         }
 
         $item->displayCategoryTitle = $this->display['show_category'] ? $item->category_title : '';
+        if (array_key_exists('category', $this->_models)) {
+            $categoryData = $this->getModel('category')->getItem($item->catid);
+
+            $item->categoryDescription = $categoryData->description;
+            $item->categoryMetadesc = $categoryData->metadesc;
+            $item->categoryMetakey = $categoryData->metakey;
+
+            $categoryParams = $categoryData->params;
+            $item->categoryImage = HTMLHelper::_('cleanImageURL', $categoryParams['image']);
+            $item->categoryImage->url = VapiHelper::resolve($item->categoryImage->url);
+            $item->categoryImage->alt = VapiHelper::escape($categoryParams['image_alt']);
+        }
+
         $item->displayHits          = $this->display['show_hits'] ? $item->hits : '';
         $item->displayAuthorName    = $this->display['show_author'] ? $item->author : '';
 

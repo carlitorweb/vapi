@@ -13,6 +13,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Factory;
 use Joomla\Database\ParameterType;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
+use Joomla\Component\Categories\Administrator\Model\CategoryModel;
 
 /**
  * * NOTE: Also we can connect to my own model
@@ -53,57 +54,62 @@ class ModulesController extends ApiController
     {
         $params = empty($this->moduleParams) ?  $this->setModuleParams() : $this->moduleParams;
 
-        $factory = $this->app->bootComponent('com_content')->getMVCFactory();
+        $articleFactory  = $this->app->bootComponent('com_content')->getMVCFactory();
+        $categoryFactory = $this->app->bootComponent('com_categories')->getMVCFactory();
 
         // Get an instance of the generic articles model
-        /** @var ArticlesModel $articles */
-        $articles = $factory->createModel('Articles', 'Site', ['ignore_request' => true]);
+        /** @var ArticlesModel $articlesModel */
+        $articlesModel = $articleFactory->createModel('Articles', 'Site', ['ignore_request' => true]);
 
-        if (!$articles) {
+        // Category instance needed by the view to get the category data of each article
+        /** @var CategoryModel $categoryModel */
+        $categoryModel = $categoryFactory->createModel('Category', 'Administrator', ['ignore_request' => true]);
+
+        if (!$articlesModel || !$categoryModel) {
             throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
         }
 
         $appParams = ComponentHelper::getComponent('com_content')->getParams();
-        $articles->setState('params', $appParams);
+        $articlesModel->setState('params', $appParams);
 
-        $articles->setState('filter.published', ContentComponent::CONDITION_PUBLISHED);
+        $articlesModel->setState('filter.published', ContentComponent::CONDITION_PUBLISHED);
 
         /*
          * Set the filters based on the module params
         */
-        $articles->setState('list.start', 0);
-        $articles->setState('list.limit', (int) $params->get('count', 0));
+        $articlesModel->setState('list.start', 0);
+        $articlesModel->setState('list.limit', (int) $params->get('count', 0));
 
         $catids = $params->get('catid');
-        $articles->setState('filter.category_id', $catids);
+        $articlesModel->setState('filter.category_id', $catids);
 
         // Ordering
         $ordering = $params->get('article_ordering', 'a.ordering');
-        $articles->setState('list.ordering', $ordering);
-        $articles->setState('list.direction', $params->get('article_ordering_direction', 'ASC'));
+        $articlesModel->setState('list.ordering', $ordering);
+        $articlesModel->setState('list.direction', $params->get('article_ordering_direction', 'ASC'));
 
-        $articles->setState('filter.featured', $params->get('show_front', 'show'));
+        $articlesModel->setState('filter.featured', $params->get('show_front', 'show'));
 
         $excluded_articles = $params->get('excluded_articles', '');
 
         if ($excluded_articles) {
             $excluded_articles = explode("\r\n", $excluded_articles);
-            $articles->setState('filter.article_id', $excluded_articles);
+            $articlesModel->setState('filter.article_id', $excluded_articles);
 
             // Exclude
-            $articles->setState('filter.article_id.include', false);
+            $articlesModel->setState('filter.article_id.include', false);
         }
 
-        $this->setView($articles);
+        $this->setView($articlesModel, $categoryModel);
         return $this;
     }
 
     /**
      * Set the view
      *
-     * @param $model The model to use in the view
+     * @param $articlesModel The articles model to use in the view
      */
-    protected function setView(ArticlesModel $model): void
+    protected function setView(ArticlesModel $articlesModel, CategoryModel $categoryModel): void
     {
         $viewType   = $this->app->getDocument()->getType();
         $viewName   = $this->input->get('view', $this->default_view);
@@ -122,7 +128,11 @@ class ModulesController extends ApiController
         }
 
         // Push the model into the view (as default)
-        $view->setModel($model, true);
+        $view->setModel($articlesModel, true);
+
+        if ($this->moduleParams->get('show_category', 0)) {
+            $view->setModel($categoryModel);
+        }
 
         $view->document = $this->app->getDocument();
 

@@ -73,7 +73,7 @@ class VapiHelper
      *
      * @return  string
      */
-    protected static function resolve(string $uri): string
+    public static function resolve(string $uri): string
     {
         // Check if external URL.
         if (stripos($uri, 'http') !== 0) {
