@@ -7,6 +7,8 @@ defined('_JEXEC') || die;
 use Joomla\CMS\MVC\View\JsonApiView as BaseApiView;
 use Joomla\CMS\HTML\HTMLHelper;
 use Carlitorweb\Component\Vapi\Api\Helper\VapiHelper;
+use Joomla\Database\ParameterType;
+use Joomla\CMS\Factory;
 
 class JsonapiView extends BaseApiView
 {
@@ -16,8 +18,6 @@ class JsonapiView extends BaseApiView
     protected $fieldsToRenderList = [
         'id',
         'title',
-        'displayAuthorName',
-        'author_email',
         'alias',
         'displayDate',
         'images',
@@ -31,6 +31,9 @@ class JsonapiView extends BaseApiView
         'categoryMetadesc',
         'categoryMetakey',
         'categoryImage',
+        'displayAuthorName',
+        'author_email',
+        'contactData',
     ];
 
     /**
@@ -105,11 +108,75 @@ class JsonapiView extends BaseApiView
             $item->categoryImage->alt = VapiHelper::escape($categoryParams['image_alt']);
         }
 
+        if (empty($item->created_by_alias)) {
+            $contactData = $this->getContactData($item->created_by);
+
+            if ($contactData) {
+                $contactData->image = HTMLHelper::_('cleanImageURL', $contactData->image);
+                $contactData->image->url = VapiHelper::resolve($contactData->image->url);
+                $contactData->image->alt = $contactData->name;
+
+                $item->contactData = $contactData;
+            }
+        }
+
         $item->displayHits          = $this->display['show_hits'] ? $item->hits : '';
         $item->displayAuthorName    = $this->display['show_author'] ? $item->author : '';
 
         $item->images = VapiHelper::getImageAttributes($item->images);
 
         return parent::prepareItem($item);
+    }
+
+    /**
+     * Retrieve Contact
+     *
+     * @param   int  $userId  Id of the user who created the article
+     *
+     * @return  stdClass|null  Object containing contact details or null if not found
+     */
+    protected function getContactData($userId)
+    {
+        static $contacts = array();
+
+        // Note: don't use isset() because value could be null.
+        if (array_key_exists($userId, $contacts)) {
+            return $contacts[$userId];
+        }
+
+        $db     = Factory::getContainer()->get('DatabaseDriver');
+        $query  = $db->getQuery(true);
+        $userId = (int) $userId;
+
+        $query->select(
+            $db->quoteName(
+                [
+                    'contact.name',
+                    'contact.alias',
+                    'contact.con_position',
+                    'contact.webpage',
+                    'contact.email_to',
+                    'contact.misc',
+                    'contact.image',
+                ]
+            )
+        )
+            ->from($db->quoteName('#__contact_details', 'contact'))
+            ->where(
+                [
+                    $db->quoteName('contact.published') . ' = 1',
+                    $db->quoteName('contact.user_id') . ' = :createdby',
+                ]
+            )
+            ->bind(':createdby', $userId, ParameterType::INTEGER);
+
+        $query->order($db->quoteName('contact.id') . ' DESC')
+            ->setLimit(1);
+
+        $db->setQuery($query);
+
+        $contacts[$userId] = $db->loadObject();
+
+        return $contacts[$userId];
     }
 }

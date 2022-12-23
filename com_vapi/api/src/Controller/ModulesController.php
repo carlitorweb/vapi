@@ -55,17 +55,12 @@ class ModulesController extends ApiController
         $params = empty($this->moduleParams) ?  $this->setModuleParams() : $this->moduleParams;
 
         $articleFactory  = $this->app->bootComponent('com_content')->getMVCFactory();
-        $categoryFactory = $this->app->bootComponent('com_categories')->getMVCFactory();
 
         // Get an instance of the generic articles model
         /** @var ArticlesModel $articlesModel */
         $articlesModel = $articleFactory->createModel('Articles', 'Site', ['ignore_request' => true]);
 
-        // Category instance needed by the view to get the category data of each article
-        /** @var CategoryModel $categoryModel */
-        $categoryModel = $categoryFactory->createModel('Category', 'Administrator', ['ignore_request' => true]);
-
-        if (!$articlesModel || !$categoryModel) {
+        if (!$articlesModel) {
             throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
         }
 
@@ -100,7 +95,7 @@ class ModulesController extends ApiController
             $articlesModel->setState('filter.article_id.include', false);
         }
 
-        $this->setView($articlesModel, $categoryModel);
+        $this->setView($articlesModel);
         return $this;
     }
 
@@ -109,7 +104,7 @@ class ModulesController extends ApiController
      *
      * @param $articlesModel The articles model to use in the view
      */
-    protected function setView(ArticlesModel $articlesModel, CategoryModel $categoryModel): void
+    protected function setView(ArticlesModel $articlesModel): void
     {
         $viewType   = $this->app->getDocument()->getType();
         $viewName   = $this->input->get('view', $this->default_view);
@@ -130,7 +125,16 @@ class ModulesController extends ApiController
         // Push the model into the view (as default)
         $view->setModel($articlesModel, true);
 
+        // Category instance needed by the view to get the category data of each article
         if ($this->moduleParams->get('show_category', 0)) {
+            $categoryFactory = $this->app->bootComponent('com_categories')->getMVCFactory();
+
+            /** @var CategoryModel $categoryModel */
+            $categoryModel = $categoryFactory->createModel('Category', 'Administrator', ['ignore_request' => true]);
+
+            if (!$categoryModel) {
+                throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
+            }
             $view->setModel($categoryModel);
         }
 
