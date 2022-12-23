@@ -1,4 +1,17 @@
 <changelogs>
+<changelog>
+        <element>pkg_vapi</element>
+        <type>package</type>
+        <version>1.1.0</version>
+        <addition>
+            <item>Added category relevant data to the fetch Response</item>
+            <item>Added user contact relevant data to the fetch Response</item>
+        </addition>
+        <change>
+            <item>Fully Qualified Domain name for the image url</item>
+            <item>getModuleById method moved as protected</item>
+        </change>
+    </changelog>
     <changelog>
         <element>pkg_vapi</element>
         <type>package</type>

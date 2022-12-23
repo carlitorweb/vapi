@@ -4,6 +4,26 @@
 		<description>Vapi Package</description>
 		<element>pkg_vapi</element>
 		<type>package</type>
+		<version>1.1.0</version>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/carlitorweb/vapi/releases/download/v1.1.0/vapi.zip</downloadurl>
+        </downloads>
+
+		<changelogurl>https://raw.githubusercontent.com/carlitorweb/vapi/master/changelog.xml</changelogurl>
+
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>carlitorweb</maintainer>
+		<maintainerurl>https://github.com/carlitorweb/vapi</maintainerurl>
+		<targetplatform name="joomla" version="(4\.(0|1)))" />
+		<php_minimum>7.2</php_minimum>
+    </update>
+	<update>
+		<name>Vapi</name>
+		<description>Vapi Package</description>
+		<element>pkg_vapi</element>
+		<type>package</type>
 		<version>1.0.2</version>
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/carlitorweb/vapi/releases/download/v1.0.2/vapi.zip</downloadurl>
