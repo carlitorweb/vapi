@@ -33,32 +33,31 @@ class VapiHelper
      */
     public static function getImageAttributes(string $images): array
     {
-        $_images  = json_decode($images);
+        $_images     = json_decode($images);
         $_introImage = new \stdClass;
-        $_fullImage = new \stdClass;
+        $_fullImage  = new \stdClass;
 
         if (!empty($_images->image_intro)) {
             $img = HTMLHelper::_('cleanImageURL', $_images->image_intro);
 
-            $_introImage->src =  self::resolve($img->url);
-            $_introImage->alt = empty($_images->image_intro_alt) && empty($_images->image_intro_alt_empty) ? false : self::escape($_images->image_intro_alt);
-
+            $_introImage->src  = self::resolve($img->url);
+            $_introImage->alt  = empty($_images->image_intro_alt) && empty($_images->image_intro_alt_empty) ? false : self::escape($_images->image_intro_alt);
 
             if ($img->attributes['width'] > 0 && $img->attributes['height'] > 0) {
-                $_introImage->width = $img->attributes['width'];
+                $_introImage->width  = $img->attributes['width'];
                 $_introImage->height = $img->attributes['height'];
             }
         }
 
         if (!empty($_images->image_fulltext)) {
-            $img = HTMLHelper::_('cleanImageURL', $_images->image_fulltext);
+            $img    = HTMLHelper::_('cleanImageURL', $_images->image_fulltext);
 
-            $_fullImage->src = self::resolve($img->url);
-            $_fullImage->alt = empty($_images->image_fulltext_alt) && empty($_images->image_fulltext_alt_empty) ? false : self::escape($_images->image_intro_alt);
+            $_fullImage->src     = self::resolve($img->url);
+            $_fullImage->alt     = empty($_images->image_fulltext_alt) && empty($_images->image_fulltext_alt_empty) ? false : self::escape($_images->image_intro_alt);
             $_fullImage->caption = empty($_images->image_fulltext_caption) ? false : self::escape($_images->image_fulltext_caption);
 
             if ($img->attributes['width'] > 0 && $img->attributes['height'] > 0) {
-                $_fullImage->width = $img->attributes['width'];
+                $_fullImage->width  = $img->attributes['width'];
                 $_fullImage->height = $img->attributes['height'];
             }
         }

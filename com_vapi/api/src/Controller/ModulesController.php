@@ -4,61 +4,108 @@ namespace Carlitorweb\Component\Vapi\Api\Controller;
 
 defined('_JEXEC') || die;
 
-use Joomla\CMS\MVC\Controller\ApiController;
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\Registry\Registry;
-use Joomla\Component\Content\Administrator\Extension\ContentComponent;
-use Joomla\Component\Content\Site\Model\ArticlesModel;
+use Joomla\CMS\MVC\Factory\ApiMVCFactory;
+use Joomla\CMS\Application\ApiApplication;
+use Joomla\Input\Input;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Factory;
-use Joomla\Database\ParameterType;
-use Joomla\CMS\Cache\CacheControllerFactoryInterface;
-use Joomla\Component\Categories\Administrator\Model\CategoryModel;
+use Joomla\Component\Content\Administrator\Extension\ContentComponent;
+use Joomla\CMS\Component\ComponentHelper;
 
-/**
- * * NOTE: Also we can connect to my own model
- * $model = $this->getModel($this->contentType, 'Administrator');
- * $model->getItems();
- */
-
-
-/**
- * Vapi basic service controller.
- *
- */
-class ModulesController extends ApiController
+class ModuleController extends \Joomla\CMS\MVC\Controller\BaseController
 {
-    /**
-     * @var string $contentType Used as default for $modelName as well as
-     * when outputting response as type object
-     */
-    protected $contentType = 'com_vapi.modules';
-
     /**
      * @var string $default_view Will be used as default for $viewName
      */
     protected $default_view = 'modules';
 
     /**
-     * @var Registry $moduleParams The params to set filters in the model
+     * @var \Joomla\Registry\Registry $moduleParams The module params to set filters in the model
      */
     protected $moduleParams;
 
     /**
-     * Get the articles features list
+     * Constructor.
      *
-     * @return  static  A BaseController object to support chaining.
+     * @param   array           $config   An optional associative array of configuration settings
+     *
+     * @param   ApiMVCFactory   $factory  The factory.
+     * @param   ApiApplication  $app      The Application for the dispatcher
+     * @param   Input           $input    Input
+     *
+     * @throws  \Exception
+     */
+    public function __construct($config = array(), ApiMVCFactory $factory = null, ?ApiApplication $app = null, ?Input $input = null)
+    {
+        if (\array_key_exists('moduleParams', $config)) {
+            $this->moduleParams = new \Joomla\Registry\Registry($config['moduleParams']);
+        }
+
+        parent::__construct($config, $factory, $app, $input);
+    }
+
+    /**
+     * Set the models and execute the view
+     *
+     * @throws  \Exception
+     */
+    public function displayModule(): void
+    {
+        $moduleID    = $this->input->get('id', 0, 'int');
+        $moduleState = new \Joomla\Registry\Registry(['moduleID' => $moduleID]);
+
+        /** @var \Carlitorweb\Component\Vapi\Api\Model\ModuleModel $moduleModel */
+        $moduleModel = $this->factory->createModel('Module', 'Api', ['ignore_request' => true, 'state' => $moduleState]);
+
+        // Set the params who will be used by the model
+        if (empty($this->moduleParams)) {
+            $this->setModuleParams($moduleModel);
+        }
+
+        $mainModel = $this->getMainModelForView($this->moduleParams);
+
+        /** @var \Joomla\CMS\Document\JsonDocument $document */
+        $document   = $this->app->getDocument();
+
+        $viewType   = $document->getType();
+        $viewName   = $this->input->get('view', $this->default_view);
+        $viewLayout = $this->input->get('layout', 'default', 'string');
+
+        try {
+            /** @var \Carlitorweb\Component\Vapi\Api\View\Modules\JsonView $view */
+            $view = $this->getView(
+                $viewName,
+                $viewType,
+                '',
+                ['moduleParams' => $this->moduleParams, 'base_path' => $this->basePath, 'layout' => $viewLayout]
+            );
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
+
+        // Push the model into the view (as default)
+        $view->setModel($mainModel, true);
+
+        // Push as secondary model the Module model
+        $view->setModel($moduleModel);
+
+        $view->document = $this->app->getDocument();
+
+        $view->display();
+    }
+
+    /**
+     * Boot the model and set the states
+     *
+     * @param  \Joomla\Registry\Registry  $params The module params
      *
      */
-    public function displayList()
+    protected function getMainModelForView($params): \Joomla\Component\Content\Site\Model\ArticlesModel
     {
-        $params = empty($this->moduleParams) ?  $this->setModuleParams() : $this->moduleParams;
-
-        $articleFactory  = $this->app->bootComponent('com_content')->getMVCFactory();
+        $mvcContentFactory = $this->app->bootComponent('com_content')->getMVCFactory();
 
         // Get an instance of the generic articles model
-        /** @var ArticlesModel $articlesModel */
-        $articlesModel = $articleFactory->createModel('Articles', 'Site', ['ignore_request' => true]);
+        /** @var \Joomla\Component\Content\Site\Model\ArticlesModel $articlesModel */
+        $articlesModel = $mvcContentFactory->createModel('Articles', 'Site', ['ignore_request' => true]);
 
         if (!$articlesModel) {
             throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
@@ -71,7 +118,7 @@ class ModulesController extends ApiController
 
         /*
          * Set the filters based on the module params
-        */
+         */
         $articlesModel->setState('list.start', 0);
         $articlesModel->setState('list.limit', (int) $params->get('count', 0));
 
@@ -95,120 +142,30 @@ class ModulesController extends ApiController
             $articlesModel->setState('filter.article_id.include', false);
         }
 
-        $this->setView($articlesModel);
-        return $this;
+        return $articlesModel;
     }
 
     /**
-     * Set the view
+     * Set the module params
      *
-     * @param $articlesModel The articles model to use in the view
+     * @param  \Carlitorweb\Component\Vapi\Api\Model\ModuleModel  $moduleModel
+     *
      */
-    protected function setView(ArticlesModel $articlesModel): void
+    protected function setModuleParams($moduleModel): \Joomla\Registry\Registry
     {
-        $viewType   = $this->app->getDocument()->getType();
-        $viewName   = $this->input->get('view', $this->default_view);
-        $viewLayout = $this->input->get('layout', 'default', 'string');
-
-        try {
-            /** @var \Joomla\CMS\MVC\View\JsonApiView $view */
-            $view = $this->getView(
-                $viewName,
-                $viewType,
-                '',
-                ['moduleParams' => $this->moduleParams, 'base_path' => $this->basePath, 'layout' => $viewLayout, 'contentType' => $this->contentType]
-            );
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
-
-        // Push the model into the view (as default)
-        $view->setModel($articlesModel, true);
-
-        // Category instance needed by the view to get the category data of each article
-        if ($this->moduleParams->get('show_category', 0)) {
-            $categoryFactory = $this->app->bootComponent('com_categories')->getMVCFactory();
-
-            /** @var CategoryModel $categoryModel */
-            $categoryModel = $categoryFactory->createModel('Category', 'Administrator', ['ignore_request' => true]);
-
-            if (!$categoryModel) {
-                throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
-            }
-            $view->setModel($categoryModel);
-        }
-
-        $view->document = $this->app->getDocument();
-
-        $view->displayList();
-    }
-
-    /**
-     *  Set the module params
-     *
-     * @param int $id The module ID
-     *
-     * @return Registry The module params
-     */
-    protected function setModuleParams(?int $id = null): Registry
-    {
-        if ($id === null) {
-            $id = $this->input->get('id', 0, 'int');
-        }
-
         // Get the module params
-        $module = $this->getModuleById($id);
-        return $this->moduleParams = new Registry($module->params);
-    }
+        $module = $moduleModel->getModule();
 
-    /**
-     * Get module by id
-     *
-     * @param   int  $id  The id of the module
-     *
-     * @return  \stdClass  The Module object
-     *
-     * @throws \RuntimeException If the module could not be found
-     *
-     * @see \Joomla\CMS\Helper\ModuleHelper
-     */
-    protected function getModuleById(int $moduleId): object
-    {
-        /** @var \Joomla\CMS\Application\CMSApplicationInterface $app */
-        $app    = Factory::getApplication();
-
-        // Build a cache ID for the resulting data object
-        $cacheId = 'moduleId' . $moduleId;
-
-        /** @var \Joomla\Database\DatabaseDriver $db */
-        $db = Factory::getContainer()->get('DatabaseDriver');
-        $query  = $db->getQuery(true);
-
-        $query->select('m.*')
-            ->from($db->quoteName('#__modules', 'm'))
-            ->where(
-                $db->quoteName('m.id') . ' = :moduleId'
-            )
-            ->bind(':moduleId', $moduleId, ParameterType::INTEGER);
-
-        // Set the query
-        $db->setQuery($query);
-
-        try {
-            /** @var \Joomla\CMS\Cache\Controller\CallbackController $cache */
-            $cache = Factory::getContainer()->get(CacheControllerFactoryInterface::class)
-                ->createCacheController('callback', ['defaultgroup' => 'com_modules']);
-
-            $module = $cache->get(array($db, 'loadObject'), array(), md5($cacheId), false);
-        } catch (\RuntimeException $e) {
-            $app->getLogger()->warning(
-                Text::sprintf('JLIB_APPLICATION_ERROR_MODULE_LOAD', $e->getMessage()),
-                array('category' => 'jerror')
+        if (is_null($module)) {
+            throw new \UnexpectedValueException(
+                sprintf(
+                    '$module need be of type object, %s was returned in %s()',
+                    gettype($module),
+                    __FUNCTION__
+                )
             );
-
-            return array();
         }
 
-        return $module;
+        return $this->moduleParams = new \Joomla\Registry\Registry($module->params);
     }
 }
