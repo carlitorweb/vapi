@@ -11,7 +11,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\Component\Content\Administrator\Extension\ContentComponent;
 use Joomla\CMS\Component\ComponentHelper;
 
-class ModuleController extends \Joomla\CMS\MVC\Controller\BaseController
+class ModulesController extends \Joomla\CMS\MVC\Controller\BaseController
 {
     /**
      * @var string $default_view Will be used as default for $viewName

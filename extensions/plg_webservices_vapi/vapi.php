@@ -20,7 +20,7 @@ class PlgWebservicesVapi extends CMSPlugin
     {
         // Render a list of com_content articles using the specific module
         // params as filters for the articles model
-        $this->createModuleSiteRoutes($router, 'v1/vapi/modules/:id', 'module.displayModule');
+        $this->createModuleSiteRoutes($router, 'v1/vapi/modules/:id', 'modules.displayModule');
     }
 
     /**
