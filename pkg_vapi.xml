@@ -6,7 +6,7 @@
   -->
 
 <extension type="package" method="upgrade">
-    <name>Vapi package</name>
+    <name>Vapi</name>
     <author>carlitorweb</author>
     <creationDate>2022-12-21</creationDate>
     <packagename>vapi</packagename>

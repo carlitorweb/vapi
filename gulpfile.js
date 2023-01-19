@@ -10,7 +10,7 @@ const pkgVapi = require('./pkg_vapi.json');
  */
 function cleanAndBuild() {
     // Clean the output zip package and the previous json manifest
-    src(['./packages/*', './pkg_vapi.json'], { read: false }).pipe(rm());
+    src(['./packages/*', './pkg_vapi.json', './dist/*'], { read: false }).pipe(rm());
 
     // Build a new json manifest
     return src('./pkg_vapi.xml')
@@ -20,20 +20,20 @@ function cleanAndBuild() {
 }
 
 function zipComponent() {
-    return src('./extensions/com_vapi/**/*')
+    return src('./extensions/com_vapi/**/*', { read: false })
         .pipe(zip('com_vapi.zip'))
         .pipe(dest('./packages'));
 }
 
 function zipPlugin() {
-    return src('./extensions/plg_webservices_vapi/**/*')
+    return src('./extensions/plg_webservices_vapi/**/*', { read: false })
         .pipe(zip('plg_webservices_vapi.zip'))
         .pipe(dest('./packages'));
 }
 
 function zipPackage() {
     return src(['./packages/*', './pkg_vapi.xml'])
-        .pipe(zip(`${pkgVapi.extension.name}_${pkgVapi.extension.version}`))
+        .pipe(zip(`${pkgVapi.extension.name[0]}_${pkgVapi.extension.version}.zip`))
         .pipe(dest('./dist'));
 }
 
