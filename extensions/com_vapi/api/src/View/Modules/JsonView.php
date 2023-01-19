@@ -66,7 +66,7 @@ class JsonView extends BaseJsonView
     }
 
     /**
-     * Set the data who will be load
+     * Set the data to load
      */
     protected function setOutput(array $items = null): void
     {
@@ -80,7 +80,7 @@ class JsonView extends BaseJsonView
             $items = [];
 
             foreach ($mainModel->getItems() as $item) {
-                $_item = $this->prepareItem($item, $moduleModel);
+                $_item   = $this->prepareItem($item, $moduleModel);
                 $items[] = $this->getAllowedPropertiesToRender($_item);
             }
         }

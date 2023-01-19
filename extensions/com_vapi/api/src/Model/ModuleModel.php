@@ -123,7 +123,7 @@ class ModuleModel extends \Joomla\CMS\MVC\Model\BaseDatabaseModel
      * @param  \Joomla\Database\DatabaseInterface  $db
      *
      */
-    protected function getModuleQuery($db, $mid): \Joomla\Database\QueryInterface
+    private function getModuleQuery($db, $mid): \Joomla\Database\QueryInterface
     {
         $query = $db->getQuery(true);
 

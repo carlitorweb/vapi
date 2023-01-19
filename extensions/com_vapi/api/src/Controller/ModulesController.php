@@ -78,7 +78,8 @@ class ModuleController extends \Joomla\CMS\MVC\Controller\BaseController
                 '',
                 ['moduleParams' => $this->moduleParams, 'base_path' => $this->basePath, 'layout' => $viewLayout]
             );
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage());
         }
 

@@ -3,3 +3,6 @@ vendor
 packages
 *.zip
 .vscode
+node_modules
+pkg_vapi.json
+dist
