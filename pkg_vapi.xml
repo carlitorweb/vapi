@@ -22,7 +22,7 @@
     <blockChildUninstall>true</blockChildUninstall>
 
     <!-- List of extensions to install -->
-    <files folder="packages">
+    <files>
         <!-- Component -->
         <file type="component" id="com_vapi">com_vapi.zip</file>
 

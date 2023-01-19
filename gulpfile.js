@@ -20,13 +20,13 @@ function cleanAndBuild() {
 }
 
 function zipComponent() {
-    return src('./extensions/com_vapi/**/*', { read: false })
+    return src('./extensions/com_vapi/**/*')
         .pipe(zip('com_vapi.zip'))
         .pipe(dest('./packages'));
 }
 
 function zipPlugin() {
-    return src('./extensions/plg_webservices_vapi/**/*', { read: false })
+    return src('./extensions/plg_webservices_vapi/**/*')
         .pipe(zip('plg_webservices_vapi.zip'))
         .pipe(dest('./packages'));
 }
