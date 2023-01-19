@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="webservices" method="upgrade">
+	<name>plg_webservices_vapi</name>
+	<author>Carlos Rodriguez</author>
+	<creationDate>2022-11</creationDate>
+	<copyright>Copyright (c)2022 Carlos Rodriguez</copyright>
+	<license>GNU GPL v3 or later</license>
+	<authorEmail>crsanchez8646@gmail.com</authorEmail>
+	<version>1.0.0</version>
+	<description>Routes API for VAPI</description>
+	<files>
+		<filename plugin="vapi">vapi.php</filename>
+	</files>
+</extension>
